@@ -43,13 +43,14 @@ class WsChatCommand extends Command {
 	{
 		$port = intval($this->option('port'));
         $loop   = \React\EventLoop\Factory::create();
+        $pusher = new \App\Websocket\Pusher($loop);
 
 		$webSock = new \React\Socket\Server($loop);
 		$webSock->listen($port, '0.0.0.0');
 		$webServer = new \Ratchet\Server\IoServer(
 	        new \Ratchet\Http\HttpServer(
 	            new \Ratchet\WebSocket\WsServer(
-                    new \App\Websocket\Chat()
+                    new \App\Websocket\Chat($pusher)
 	            )
 	        ),
 	        $webSock
