@@ -10,9 +10,15 @@ use Exception;
 
 class Chat implements MessageComponentInterface {
     protected $clients;
+    private static $instance;
 
     public function __construct() {
         $this->clients = new \SplObjectStorage;
+        self::$instance = $this;
+    }
+
+    public static function getInstance() {
+        return self::$instance;
     }
 
     public function onOpen(ConnectionInterface $conn) {
@@ -63,5 +69,12 @@ class Chat implements MessageComponentInterface {
     public function onError(ConnectionInterface $conn, \Exception $e) {
         Log::e($e);
         $conn->close();
+    }
+
+    public function broadcast($msg) {
+        foreach ($this->clients as $client) {
+            $client->send($msg);
+            Log::v('S', $client, "sending message \"{$msg}\"");
+        }
     }
 }
